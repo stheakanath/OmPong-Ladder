@@ -1,18 +1,121 @@
 <html>
     <head>
         <script type="text/javascript" src="https://omlet.me/a/js/omlet.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script type="text/javascript" src="ladder.js"></script>
         <link href="css/bootstrap.min.css" rel="stylesheet">
     </head>
     <title>OmPong Ladder</title>
     <body>
+
+        <!-- HTML Body -->
         <div class="container-fluid">
             <h2>OmPong Ladder</h2>
-            <textarea class="form-control" id="area1" rows="15" placeholder="Enter Something Here!"></textarea>
+            <div class="form-horizontal">
+                <h3 id ="ladder_name">
+                    Omlet Interns
+                    <button class="btn pull-right btn-success btn-sm" style="margin: 4px;" data-toggle="modal" data-target="#add_game">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </button>
+                    <button class="btn pull-right btn-primary btn-sm" style="margin: 4px;" data-toggle="modal" data-target="#add_user">
+                        <span class="glyphicon glyphicon-user"></span>
+                    </button>
+                </h3>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Ranking</th>
+                        <th>Player</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Sony</td><td>510.00</td></tr>
+                    <tr><td>2</td><td>Sid</td><td>509.00</td></tr>
+                    <tr><td>3</td><td>Luke</td><td>410.00</td></tr>
+                    <tr><td>4</td><td>Hao</td><td>309.00</td></tr>
+                    <tr><td>5</td><td>Random Weeby</td><td>210.00</td></tr>
+                </tbody>
+            </table>
             <br/>
             <button type="button" class="btn btn-primary" onclick="shareToOmlet()">Share to Omlet</button>
         </div>
+        <!-- Modal Add Game -->
+        <div class="modal fade" id="add_game" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Record Game</h4>
+                     </div>
+                    <div class="modal-body">
+                        <!-- Players -->
+                        <form class="form-horizontal" role="form">
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">Player 1:</label>
+                                <div class="col-sm-6">
+                                    <select class="form-control">
+                                        <option value="one">One</option>
+                                        <option value="two">Two</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">Player 2:</label>
+                                <div class="col-sm-6">
+                                    <select class="form-control">
+                                        <option value="one">One</option>
+                                        <option value="two">Two</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                        </br>
+
+                        <!-- Score -->
+                        <h4>Game 1:<h4>
+                        <input type="text" id="g1_p1" class="form-control input-xs" style = "width:45px;float: left;margin: 4px;" placeholder = "P1"/>
+                        <input type="text" id="g1_p2" class="form-control input-xs" style = "width:45px;float: left;margin: 4px;" placeholder = "P2"/> 
+                        <br/><br/>
+                        <h4>Game 2:<h4>
+                        <input type="text" id="g2_p1" class="form-control input-xs" style = "width:45px;float: left;margin: 4px;" placeholder = "P1"/>
+                        <input type="text" id="g2_p2" class="form-control input-xs" style = "width:45px;float: left;margin: 4px;" placeholder = "P2"/> 
+                        <br/><br/>
+                        <h4>Game 3:<h4>
+                        <input type="text" id="g3_p1" class="form-control input-xs" style = "width:45px;float: left;margin: 4px;" placeholder = "P1"/>
+                        <input type="text" id="g3_p2" class="form-control input-xs" style = "width:45px;float: left;margin: 4px;" placeholder = "P2"/> 
+                        <br/><br/>  
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Add Game!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Add User -->
+        <div class="modal fade" id="add_user" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Add Player</h4>
+                     </div>
+                    <div class="modal-body">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-addon">Name:</span>
+                            <input type="text" class="form-control" placeholder="Firstname Lastname">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Add Player!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://code.jquery.com/jquery.js"></script>
         <script src="js/bootstrap.min.js"></script>
     </body>
 </html>
