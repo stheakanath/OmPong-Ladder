@@ -36,6 +36,7 @@ function deletePlayer() {
      $('#delete_user').modal('hide');
      alert("No matching player found!");
   }
+  $('#delete_player_box').val('');
 
 }
 
@@ -69,43 +70,68 @@ function recordGame() {
              players.splice(x, 1);
           }
        }
-        var tempP1Score;
-        var tempP2Score;
-        if(p1.intScore > p2.intScore) { //higher point user wins
-            tempP1Score = p1.intScore + (p1.intScore-p2.intScore)/2;
-            tempP2Score = p2.intScore + (p1.intScore-p2.intScore)/10;
-        } else if (p1.intScore < p2.intScore) { //lower point user wins
-            tempP1Score = p1.intScore + (p2.intScore-p1.intScore)/2;
-            tempP2Score = p2.intScore - (p2.intScore-p1.intScore)/5;
-        } else if (p1.intScore == p2.intScore) {
-            tempP1Score = p1.intScore + 20;
-            tempP2Score = p2.intScore - 10;
-        } else {
-           alert("Catched an error. Double check code!");
-        }
-        p1.intScore = tempP1Score;
-        p2.intScore = tempP2Score;
-        players.push(p1);
-        players.push(p2);
-        players.sort(function(a,b) {return (a.intScore < b.intScore) ? 1 : ((b.intScore < a.intScore) ? -1 : 0);});
-        console.log(players);
-        updateTable();
-        documentApiUpdatePlayers();
-        $('#add_game').modal('hide');
-       /* if(Omlet.isInstalled()) {
-          
-          var rdl = Omlet.createRDL({
-                  noun: "update on ladder",
-                  displayTitle: "OmPong Ladder",
-                  displayThumbnailUrl: "https://mobi-summer-sony.s3.amazonaws.com/appimages/pingpong.png",
-                  displayText: p1.name + " beat " + p2.name + "! See the current standings!",  
-                  webCallback: "https://mobi-summer-sony.s3.amazonaws.com/ladder.html",
-                  callback: (window.location.href),
-          });
-          Omlet.exit(rdl);
-      }*/
+       calculateScore(p1, p2);
    }
 }
+
+function calculateScore(winner, loser) {
+    var tempP1Score;
+    var tempP2Score;
+    var expectedresult;
+    var upsetresult;
+
+    //Matching point system to work with USATT Ranking System
+    difference = Math.abs(winner.intScore-loser.intScore);
+    if(difference >= 0 && difference <= 12) {
+       expectedresult = 8;
+       upsetresult = 8;
+    } else if(difference >= 13 && difference <= 37) {
+       expectedresult = 7;
+       upsetresult = 10;
+    } else if(difference >= 38 && difference <= 62) {
+       expectedresult = 6;
+       upsetresult = 13;
+    } else if(difference >= 63 && difference <= 87) {
+       expectedresult = 5;
+       upsetresult = 16;
+    } else if(difference >= 88 && difference <= 112) {
+       expectedresult = 4;
+       upsetresult = 20;
+    } else if(difference >= 113 && difference <= 137) {
+       expectedresult = 3;
+       upsetresult = 25;
+    } else if(difference >= 138 && difference <= 162) {
+       expectedresult = 2;
+       upsetresult = 30;
+    } else if(difference >= 163 && difference <= 187) {
+       expectedresult = 2;
+       upsetresult = 35;
+    } else if(difference >= 188 && difference <= 212) {
+       expectedresult = 1;
+       upsetresult = 40;
+    } else if(difference >= 213 && difference <= 237) {
+       expectedresult = 1;
+       upsetresult = 45;
+    } else {
+       expectedresult = 0;
+       upsetresult = 50;
+    }
+
+    tempP1Score = winner.intScore + expectedresult;
+    tempP2Score = loser.intScore - upsetresult;
+    winner.intScore = tempP1Score;
+    loser.intScore = tempP2Score;
+    players.push(winner);
+    players.push(loser);
+
+    //Clean up
+    players.sort(function(a,b) {return (a.intScore < b.intScore) ? 1 : ((b.intScore < a.intScore) ? -1 : 0);});
+    console.log(players);
+    updateTable();
+    documentApiUpdatePlayers();
+    $('#add_game').modal('hide');
+}
+
 //Shares document to Omlet once pressed
 function shareToOmlet() {
       if(Omlet.isInstalled()) {
