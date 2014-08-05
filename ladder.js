@@ -2,20 +2,114 @@
 //Sony Theakanath
 
 //Global Variables
-var text = "";
-var currentcharpos = 0;
-var oldcharpos = 0;
-var searchTimeout;
-var saved = false;
-var firsttyped = false;
+var players = [];
 
+//Player Class
+function Player(name, score) {
+   this.name = name;
+   this.intScore = score;
+}
+
+document.onload = function() {
+  updateTable();
+}
+
+function documentApiUpdatePlayers() {
+   var textPlayer = JSON.stringify(players);
+   documentApi.update(myDocId,UpdatePlayers, {"players" : textPlayer} , ReceiveUpdate, DidNotReceiveUpdate);
+}
+
+function deletePlayer() {
+  deleteplayertext = $('#delete_player_box').val();
+  var found = false
+  for(x = 0; x < players.length; x++) {
+      if(players[x].name == deleteplayertext) {
+             players.splice(x, 1);
+             found = true;
+      }
+  }
+  if(found) {
+    updateTable();
+    $('#delete_user').modal('hide');
+    documentApiUpdatePlayers();
+  } else {
+     $('#delete_user').modal('hide');
+     alert("No matching player found!");
+  }
+
+}
+
+function addPlayer() {
+   newplayertext = $('#new_player_box').val();
+   var a = new Player(newplayertext, 300);
+   players.push(a);
+   players.sort(function(a,b) {return (a.intScore < b.intScore) ? 1 : ((b.intScore < a.intScore) ? -1 : 0);});
+   console.log(players);
+   updateTable();
+   $('#new_player_box').val('');
+   $('#add_user').modal('hide');
+   clickedadd = true;
+   documentApiUpdatePlayers();
+}
+
+function recordGame() {
+   if($("#player1_formcontrol :selected").text() == $("#player2_formcontrol :selected").text()) {
+     $('#add_game').modal('hide');
+     alert("Players cannot be the same!");
+   } else {
+       var p1;
+       var p2;
+       for(x = 0; x < players.length; x++) {
+          if(players[x].name == $("#player1_formcontrol :selected").text()) {
+             p1 = players[x];
+             players.splice(x, 1);
+          }
+          if(players[x].name == $("#player2_formcontrol :selected").text()) {
+             p2 = players[x];
+             players.splice(x, 1);
+          }
+       }
+        var tempP1Score;
+        var tempP2Score;
+        if(p1.intScore > p2.intScore) { //higher point user wins
+            tempP1Score = p1.intScore + (p1.intScore-p2.intScore)/2;
+            tempP2Score = p2.intScore + (p1.intScore-p2.intScore)/10;
+        } else if (p1.intScore < p2.intScore) { //lower point user wins
+            tempP1Score = p1.intScore + (p2.intScore-p1.intScore)/2;
+            tempP2Score = p2.intScore - (p2.intScore-p1.intScore)/5;
+        } else if (p1.intScore == p2.intScore) {
+            tempP1Score = p1.intScore + 20;
+            tempP2Score = p2.intScore - 10;
+        } else {
+           alert("Catched an error. Double check code!");
+        }
+        p1.intScore = tempP1Score;
+        p2.intScore = tempP2Score;
+        players.push(p1);
+        players.push(p2);
+        players.sort(function(a,b) {return (a.intScore < b.intScore) ? 1 : ((b.intScore < a.intScore) ? -1 : 0);});
+        console.log(players);
+        updateTable();
+        documentApiUpdatePlayers();
+        $('#add_game').modal('hide');
+       /* if(Omlet.isInstalled()) {
+          
+          var rdl = Omlet.createRDL({
+                  noun: "update on ladder",
+                  displayTitle: "OmPong Ladder",
+                  displayThumbnailUrl: "https://mobi-summer-sony.s3.amazonaws.com/appimages/pingpong.png",
+                  displayText: p1.name + " beat " + p2.name + "! See the current standings!",  
+                  webCallback: "https://mobi-summer-sony.s3.amazonaws.com/ladder.html",
+                  callback: (window.location.href),
+          });
+          Omlet.exit(rdl);
+      }*/
+   }
+}
 //Shares document to Omlet once pressed
 function shareToOmlet() {
-    if(!saved) {
-      text = $('#area1').val();
-      var textText = JSON.stringify(text);
-      documentApi.update(myDocId,Update, {"text" : textText} , ReceiveUpdate, DidNotReceiveUpdate);
       if(Omlet.isInstalled()) {
+          documentApiUpdatePlayers();
           var rdl = Omlet.createRDL({
                   noun: "ladder",
                   displayTitle: "OmPong Ladder",
@@ -24,114 +118,66 @@ function shareToOmlet() {
                   webCallback: "https://mobi-summer-sony.s3.amazonaws.com/ladder.html",
                   callback: (window.location.href),
           });
-          saved = true;
           Omlet.exit(rdl);
       }
-   } else {
-      callServerScript();
-      Omlet.exit();
-   }
 }
-
-$(document).ready(function(){
-    //Updates the document to cloud after 250ms of inactivity on keyboard
-    document.getElementById('area1').onkeypress = function () {
-        firsttyped = true;
-        if (searchTimeout != undefined) clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(callServerScript, 550);
-    };
-
-    //Checks for backspace usage. Former code block doesn't handle backspaces.
-    $(document).keydown(function(e) {
-        if (e.keyCode === 8) {
-            oldcharpos = currentcharpos;
-            newtext = $('#area1').val();
-            newtext = newtext.substring(0, oldcharpos-1) + newtext.substring(oldcharpos);
-            console.log("Testing substring:  " + newtext);
-            var textText = JSON.stringify(newtext);
-            documentApi.update(myDocId,Update, {"text" : textText} , ReceiveUpdate, DidNotReceiveUpdate);
-        }
-    });
-});
-
-//Updates the document after 250ms
-function callServerScript() {
-    newtext = $('#area1').val();
-    var textText = JSON.stringify(newtext);
-    documentApi.update(myDocId,Update, {"text" : textText} , ReceiveUpdate, DidNotReceiveUpdate);
-}
-
-//Gets the caret position for string concatenation
-function getCaret(el) { 
-    if (el.selectionStart) { 
-        return el.selectionStart; 
-    } else if (document.selection) { 
-        el.focus(); 
-        var r = document.selection.createRange(); 
-        if (r == null) { 
-          return 0; 
-        } 
-        var re = el.createTextRange(), 
-        rc = re.duplicate(); 
-        re.moveToBookmark(r.getBookmark()); 
-        rc.setEndPoint('EndToStart', re); 
-        return rc.text.length; 
-    }  
-    return 0; 
-}
-
-//Checks for caret changes in TextArea
-window.addEventListener ("load", function () {
-    var input = document.getElementsByTagName ("textarea");
-    input[0].addEventListener ("keydown", function () {
-        currentcharpos = this.selectionStart;
-    }, false);
-}, false);
 
 /**
   Shared Document API. None of the methods have been edited other than ReceiveUpdate
 */
 
 Omlet.ready(function(){
-   initDocument();
+  initDocument();
 });
+
+function updateTable() {
+    if(players.length > 3) {
+       $("#share_to_omlet").hide()
+    }
+    $("#ranking_table > tbody").html("");
+    $('#player1_formcontrol option').remove();
+    $('#player2_formcontrol option').remove();
+    for(x = 0; x < players.length; x++) {
+      $('#ranking_table > tbody:last').append('<tr><td>' + (x+1) + '</td><td>' + players[x].name + '</td><td>' + (players[x].intScore).toFixed(2) +'</td></tr>');
+      $("#player1_formcontrol").append('<option>' + players[x].name +'</option>');
+      $("#player2_formcontrol").append('<option>' + players[x].name +'</option>');
+    }
+}
 
 function ReceiveUpdate(doc) {
   myDoc = doc;
   for(key in myDoc) {
     console.log(key);
   }
-  console.log("text: " + myDoc["text"]);
-  text = JSON.parse(myDoc["text"]);
-  if(firsttyped == false && text.length > 0) {
-     saved = true;
-  }
-  document.getElementById('area1').value = text;
+  players = JSON.parse(myDoc["players"]);
+  console.log("players: " + myDoc["players"]);
+  updateTable();
 }
 
 function Initialize(old, params) {
-	return params;
+  return params;
 }
 
-function Update(old, params) {
-	old.text = params["text"];
-	return old;
-	console.log("Updating!");
+function UpdatePlayers(old, params) {
+  old.players = params["players"];
+  return old;
+  console.log("Updating!");
 }
+
 
 function InitialDocument() {
-	var initValues = {
-		'text' : "",
-	};
-	return initValues;
+  var initValues = {
+    'players' : "",
+  };
+  return initValues;
 }
 
 function DocumentCreated(doc) {
-  	console.log("Document has been created.");
+    console.log("Document has been created.");
 }
 
 function DidNotReceiveUpdate(doc) {
-	console.log("I did not receive an update");
+  console.log("I did not receive an update");
 }
 
 /**
@@ -162,7 +208,7 @@ function initDocument() {
     if (Omlet.isInstalled()) {
         documentApi = Omlet.document;
         _loadDocument();
-  	}
+    }
 }
 
 function hasDocument() {
@@ -176,14 +222,14 @@ function getDocumentReference() {
     var docId = window.location.hash.substring(docIdParam+7);
     var end = docId.indexOf("/");
     if (end != -1) {
-      	docId = docId.substring(0, end);
+        docId = docId.substring(0, end);
     }
     return docId;
 }
 
 function _loadDocument() {
-  	if (hasDocument()) {
-    	  myDocId = getDocumentReference();
+    if (hasDocument()) {
+        myDocId = getDocumentReference();
         documentApi.get(myDocId, ReceiveUpdate);
         watchDocument(myDocId, ReceiveUpdate);
     } else {
@@ -200,5 +246,5 @@ function _loadDocument() {
           }, function(e) {
             alert("error: " + JSON.stringify(e));
         });
-  	}
+    }
 }
