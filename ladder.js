@@ -128,8 +128,8 @@ function calculateScore(winner, loser) {
     players.sort(function(a,b) {return (a.intScore < b.intScore) ? 1 : ((b.intScore < a.intScore) ? -1 : 0);});
     console.log(players);
     updateTable();
-    documentApiUpdatePlayers();
     $('#add_game').modal('hide');
+    documentApiUpdatePlayers();
 }
 
 //Shares document to Omlet once pressed
